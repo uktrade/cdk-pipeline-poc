@@ -25,6 +25,7 @@ class CDKDemoPipeline(Stack):
         self.pipeline_codebuild(scope, construct_id, **kwargs)
 
     def pipeline_role(self, scope, construct_id, **kwargs):
+
         role = iam.Role(
             self,
             "DemoPipelineRole",
@@ -32,10 +33,47 @@ class CDKDemoPipeline(Stack):
                 iam.ServicePrincipal("s3.amazonaws.com"),
                 iam.ServicePrincipal("codebuild.amazonaws.com"),
                 iam.ServicePrincipal("codepipeline.amazonaws.com"),
+                iam.ServicePrincipal("cloudformation.amazonaws.com"),
+                iam.ServicePrincipal("codecommit.amazonaws.com"),
+                iam.ServicePrincipal("codestar.amazonaws.com"),
             ),
             description="Pipeline Role for Bucket and Codebuild",
         )
 
+        """
+        Github Connection policy statement
+        """
+        codestart_connection_policy_statement = iam.PolicyStatement(
+            actions=[
+                "codestar-connections:CreateConnection",
+                "codestar-connections:DeleteConnection",
+                "codestar-connections:GetConnection",
+                "codestar-connections:ListConnections",
+                "codestar-connections:GetInstallationUrl",
+                "codestar-connections:GetIndividualAccessToken",
+                "codestar-connections:ListInstallationTargets",
+                "codestar-connections:StartOAuthHandshake",
+                "codestar-connections:UpdateConnectionInstallation",
+                "codestar-connections:UseConnection",
+                "codestar-connections:TagResource",
+                "codestar-connections:ListTagsForResource",
+                "codestar-connections:UntagResource",
+                "iam:PassRole",
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketAcl",
+                "s3:GetBucketLocation",
+                "codebuild:*",
+            ],
+            resources=["*"],
+        )
+
+        role.add_to_policy(codestart_connection_policy_statement)
+
+        """
+        Some informative outputs to cloudformation stack
+        """
         CfnOutput(
             self,
             "DemoPipelineRoleARN",
@@ -109,7 +147,13 @@ class CDKDemoPipeline(Stack):
                 {
                     "version": "0.2",
                     "phases": {
-                        "build": {"commands": ["echo 'Hello from Demo CodeBuild 1'"]}
+                        "build": {
+                            "commands": [
+                                "echo 'Hello from Demo CodeBuild 1'",
+                                "ls -la",
+                                "pwd",
+                            ]
+                        }
                     },
                 }
             ),
