@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import aws_cdk as core
 import aws_cdk.assertions as assertions
-from cdk_poc.cdk_poc_stack import CdkPocStack
+from cdk_poc.codebuild_stack import CdkPocStack
 
 
 def test_sqs_queue_created():
