@@ -28,7 +28,7 @@ class CDKDemoPipeline(Stack):
 
         role = iam.Role(
             self,
-            "DemoPipelineRole",
+            f"{construct_id}-Role",
             assumed_by=iam.CompositePrincipal(
                 iam.ServicePrincipal("s3.amazonaws.com"),
                 iam.ServicePrincipal("codebuild.amazonaws.com"),
@@ -37,7 +37,7 @@ class CDKDemoPipeline(Stack):
                 iam.ServicePrincipal("codecommit.amazonaws.com"),
                 iam.ServicePrincipal("codestar.amazonaws.com"),
             ),
-            description="Pipeline Role for Bucket and Codebuild",
+            description=f"{construct_id} Role for Bucket and Codebuild",
         )
 
         """
@@ -76,18 +76,18 @@ class CDKDemoPipeline(Stack):
         """
         CfnOutput(
             self,
-            "DemoPipelineRoleARN",
-            description="Demo Pipeline Role ARN",
+            f"{construct_id}-Role-ARN",
+            description=f"{construct_id} Role ARN",
             value=role.role_arn,
-            export_name="DemoPipelineRoleARN",
+            export_name=f"{construct_id}-Role-ARN",
         )
 
         CfnOutput(
             self,
-            "DemoPipelineRoleName",
-            description="Demo Pipeline Role Name",
+            f"{construct_id}-RoleName",
+            description=f"{construct_id} Role Name",
             value=role.role_name,
-            export_name="DemoPipelineRoleName",
+            export_name=f"{construct_id}-RoleName",
         )
 
         self.stack_data.update({"role": role})
@@ -98,10 +98,10 @@ class CDKDemoPipeline(Stack):
         """
         key = kms.Key(
             self,
-            "DemoPipeLineKey",
+            f"{construct_id}-Key",
             removal_policy=RemovalPolicy.DESTROY,
             pending_window=Duration.days(10),
-            description="Demo Pipeline Bucket Key",
+            description=f"{construct_id} Bucket Key",
         )
 
         """
@@ -109,7 +109,7 @@ class CDKDemoPipeline(Stack):
         """
         bucket = s3.Bucket(
             self,
-            "DemoPipelineBucket",
+            f"{construct_id}-Bucket",
             versioned=False,
             removal_policy=RemovalPolicy.DESTROY,
             encryption_key=key,
@@ -120,18 +120,18 @@ class CDKDemoPipeline(Stack):
         """
         CfnOutput(
             self,
-            "DemoPipelineBucketName",
-            description="Demo Pipeline Bucket Name",
+            f"{construct_id}-BucketName",
+            description=f"{construct_id} Bucket Name",
             value=bucket.bucket_name,
-            export_name="DemoPipelineBucketName",
+            export_name=f"{construct_id}-BucketName",
         )
 
         CfnOutput(
             self,
-            "DemoPipelineBucketARN",
-            description="Demo Pipeline Bucket ARN",
+            f"{construct_id}-BucketARN",
+            description=f"{construct_id} Bucket ARN",
             value=bucket.bucket_arn,
-            export_name="DemoPipelineBucketARN",
+            export_name=f"{construct_id}-BucketARN",
         )
 
         bucket.grant_read_write(self.stack_data["role"])
@@ -141,7 +141,7 @@ class CDKDemoPipeline(Stack):
 
         code_build = codebuild.Project(
             self,
-            "DemoCodeBuild-1",
+            f"{construct_id}-codebuild",
             role=self.stack_data["role"],
             build_spec=codebuild.BuildSpec.from_object(
                 {
@@ -149,9 +149,10 @@ class CDKDemoPipeline(Stack):
                     "phases": {
                         "build": {
                             "commands": [
-                                "echo 'Hello from Demo CodeBuild 1'",
+                                f"echo 'Hello from {construct_id} CodeBuild'",
                                 "ls -la",
                                 "pwd",
+                                "env",
                             ]
                         }
                     },
@@ -164,8 +165,8 @@ class CDKDemoPipeline(Stack):
         """
         CfnOutput(
             self,
-            "DemoPipelineCodeBuildName",
-            description="Codebuild Project Name",
+            f"{construct_id}-CodeBuildName",
+            description=f"{construct_id} Codebuild Project Name",
             value=code_build.project_name,
-            export_name="DemoPipelineCodeBuildName",
+            export_name=f"{construct_id}-BuildName",
         )

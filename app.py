@@ -9,6 +9,7 @@ env_EU = cdk.Environment(region="eu-west-2")
 
 app = cdk.App()
 
-CDKDemoPipeline(app, "cdk-demo-pipeline", env=env_EU)
+CDKDemoPipeline(app, "cdk-manual-demo-pipeline", env=env_EU)
+CDKDemoPipeline(app, "cdk-copilot-demo-pipeline", env=env_EU)
 
 app.synth()
